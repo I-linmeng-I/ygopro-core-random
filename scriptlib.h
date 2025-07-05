@@ -152,6 +152,8 @@ public:
 	static int32_t card_is_status(lua_State *L);
 	static int32_t card_is_not_tuner(lua_State *L);
 	static int32_t card_is_tuner(lua_State* L);
+	static int32_t card_is_original_effect_property(lua_State* L);
+	static int32_t card_is_effect_property(lua_State* L);
 	static int32_t card_set_status(lua_State *L);
 	static int32_t card_is_dual_state(lua_State *L);
 	static int32_t card_enable_dual_state(lua_State *L);

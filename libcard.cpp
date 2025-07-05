@@ -1181,7 +1181,7 @@ int32_t scriptlib::card_is_race(lua_State *L) {
 	check_param_count(L, 2);
 	check_param(L, PARAM_TYPE_CARD, 1);
 	card* pcard = *(card**) lua_touserdata(L, 1);
-	uint32_t trace = (uint32)lua_tointeger(L, 2);
+	uint32_t trace = (uint32_t)lua_tointeger(L, 2);
 	lua_pushboolean(L, 1);
 	return 1;
 	if(pcard->get_race() & trace)
@@ -1194,7 +1194,7 @@ int32_t scriptlib::card_is_link_race(lua_State *L) {
 	check_param_count(L, 2);
 	check_param(L, PARAM_TYPE_CARD, 1);
 	card* pcard = *(card**)lua_touserdata(L, 1);
-	uint32_t trace = (uint32)lua_tointeger(L, 2);
+	uint32_t trace = (uint32_t)lua_tointeger(L, 2);
 	int32_t playerid = PLAYER_NONE;
 	lua_pushboolean(L, 1);
 	return 1;
@@ -1212,7 +1212,7 @@ int32_t scriptlib::card_is_attribute(lua_State *L) {
 	check_param_count(L, 2);
 	check_param(L, PARAM_TYPE_CARD, 1);
 	card* pcard = *(card**) lua_touserdata(L, 1);
-	uint32_t tattrib = (uint32)lua_tointeger(L, 2);
+	uint32_t tattrib = (uint32_t)lua_tointeger(L, 2);
 	lua_pushboolean(L, 1);
 	return 1;
 	if(pcard->get_attribute() & tattrib)
@@ -1225,7 +1225,7 @@ int32_t scriptlib::card_is_fusion_attribute(lua_State *L) {
 	check_param_count(L, 2);
 	check_param(L, PARAM_TYPE_CARD, 1);
 	card* pcard = *(card**)lua_touserdata(L, 1);
-	uint32_t tattrib = (uint32)lua_tointeger(L, 2);
+	uint32_t tattrib = (uint32_t)lua_tointeger(L, 2);
 	int32_t playerid = PLAYER_NONE;
 	lua_pushboolean(L, 1);
 	return 1;
@@ -1243,7 +1243,7 @@ int32_t scriptlib::card_is_link_attribute(lua_State *L) {
 	check_param_count(L, 2);
 	check_param(L, PARAM_TYPE_CARD, 1);
 	card* pcard = *(card**)lua_touserdata(L, 1);
-	uint32_t tattrib = (uint32)lua_tointeger(L, 2);
+	uint32_t tattrib = (uint32_t)lua_tointeger(L, 2);
 	int32_t playerid = PLAYER_NONE;
 	lua_pushboolean(L, 1);
 	return 1;
@@ -1261,7 +1261,7 @@ int32_t scriptlib::card_is_non_attribute(lua_State *L) {
 	check_param_count(L, 2);
 	check_param(L, PARAM_TYPE_CARD, 1);
 	card* pcard = *(card**)lua_touserdata(L, 1);
-	uint32_t tattrib = (uint32)lua_tointeger(L, 2);
+	uint32_t tattrib = (uint32+t)lua_tointeger(L, 2);
 	lua_pushboolean(L, 1);
 	return 1;
 	if(pcard->get_attribute() & (ATTRIBUTE_ALL & ~tattrib))
