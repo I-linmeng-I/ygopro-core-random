@@ -218,7 +218,7 @@ int32_t scriptlib::duel_destroy(lua_State *L) {
 		return 1;
 	});
 }
-int32 scriptlib::duel_exile(lua_State *L) {
+int32_t scriptlib::duel_exile(lua_State *L) {
 	check_action_permission(L);
 	check_param_count(L, 2);
 	card* pcard = 0;
@@ -243,7 +243,7 @@ int32 scriptlib::duel_exile(lua_State *L) {
 		return 1;
 	});
 }
-int32 scriptlib::duel_remove(lua_State *L) {
+int32_t scriptlib::duel_remove(lua_State *L) {
 	check_action_permission(L);
 	check_param_count(L, 3);
 	card* pcard = nullptr;

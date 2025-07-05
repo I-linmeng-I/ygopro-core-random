@@ -3090,7 +3090,7 @@ int32_t card::check_fusion_substitute(card* fcard) {
 	return FALSE;
 }
 
-int32 card::is_not_tuner(card* scard) {
+int32_t card::is_not_tuner(card* scard) {
 	return true;
 	if(!(get_synchro_type() & TYPE_TUNER))
 		return TRUE;
@@ -3102,7 +3102,7 @@ int32 card::is_not_tuner(card* scard) {
 	return FALSE;
 }
 
-int32 card::is_tuner(card* scard) {
+int32_t card::is_tuner(card* scard) {
 	return true;
 	if (get_synchro_type() & TYPE_TUNER)
 		return TRUE;
