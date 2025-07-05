@@ -1261,7 +1261,7 @@ int32_t scriptlib::card_is_non_attribute(lua_State *L) {
 	check_param_count(L, 2);
 	check_param(L, PARAM_TYPE_CARD, 1);
 	card* pcard = *(card**)lua_touserdata(L, 1);
-	uint32_t tattrib = (uint32+t)lua_tointeger(L, 2);
+	uint32_t tattrib = (uint32_t)lua_tointeger(L, 2);
 	lua_pushboolean(L, 1);
 	return 1;
 	if(pcard->get_attribute() & (ATTRIBUTE_ALL & ~tattrib))
