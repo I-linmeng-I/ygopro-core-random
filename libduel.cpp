@@ -232,7 +232,7 @@ int32_t scriptlib::duel_exile(lua_State *L) {
 		pduel = pgroup->pduel;
 	} else
 		luaL_error(L, "Parameter %d should be \"Card\" or \"Group\".", 1);
-	uint32 reason = lua_tointeger(L, 2);
+	uint32_t reason = lua_tointeger(L, 2);
 	if(pcard)
 		pduel->game_field->send_to(pcard, pduel->game_field->core.reason_effect, reason, pduel->game_field->core.reason_player, PLAYER_NONE, 0, 0, POS_FACEUP);
 	else
