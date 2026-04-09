@@ -1453,11 +1453,15 @@ void field::filter_player_effect(uint8_t playerid, uint32_t code, effect_set* es
 		std::sort(eset->begin(), eset->end(), effect_sort_id);
 }
 int32_t field::filter_matching_card(lua_State* L, int32_t findex, uint8_t self, uint32_t location1, uint32_t location2, group* pgroup, card* pexception, group* pexgroup, uint32_t extraargs, card** pret, int32_t fcount, int32_t is_target) {
+    uint8_t oldself = self;
 	if(self != 0 && self != 1)
 		return FALSE;
 	card_set result;
 	uint32_t location = location1;
 	for(uint32_t p = 0; p < 2; ++p) {
+        if(core.duel_rule & DUEL_TAG_MODE && location & (LOCATION_DECK | LOCATION_HAND | LOCATION_EXTRA)) {
+            self = self + 1 - 2 * (self % 3);//改成队友
+        }
 		if(location & LOCATION_MZONE) {
 			for(auto& pcard : player[self].list_mzone) {
 				if(pcard && !pcard->is_treated_as_not_on_field()
@@ -1598,7 +1602,7 @@ int32_t field::filter_matching_card(lua_State* L, int32_t findex, uint8_t self, 
 			}
 		}
 		location = location2;
-		self = 1 - self;
+		self = 1 - oldself;
 	}
 	if (pgroup)
 		pgroup->container.insert(result.begin(), result.end());
