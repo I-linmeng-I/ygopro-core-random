@@ -20,6 +20,9 @@ interpreter::interpreter(duel* pd, bool enable_unsafe_libraries)
 	current_state = lua_state;
 	std::memcpy(lua_getextraspace(lua_state), &pd, LUA_EXTRASPACE); //set_duel_info
 	//Initial
+#ifdef YGOPRO_NO_LUA_SAFE
+	luaL_openlibs(lua_state);
+#else
 	luaL_requiref(lua_state, "base", luaopen_base, 0);
 	lua_pop(lua_state, 1);
 	luaL_requiref(lua_state, "string", luaopen_string, 1);
@@ -44,6 +47,7 @@ interpreter::interpreter(duel* pd, bool enable_unsafe_libraries)
 		nil_out("dofile");
 		nil_out("loadfile");
 	}
+#endif
 	//open all libs
 	scriptlib::open_cardlib(lua_state);
 	scriptlib::open_effectlib(lua_state);

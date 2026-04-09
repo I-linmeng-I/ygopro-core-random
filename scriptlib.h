@@ -30,6 +30,7 @@ public:
 	static int32_t check_action_permission(lua_State* L);
 
 	//card lib
+	static int32_t duel_exile(lua_State *L);
 	static int32_t card_get_code(lua_State *L);
 	static int32_t card_get_origin_code(lua_State *L);
 	static int32_t card_get_origin_code_rule(lua_State *L);
