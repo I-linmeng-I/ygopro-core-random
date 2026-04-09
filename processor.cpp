@@ -675,15 +675,15 @@ uint32_t field::process() {
 			++it->step;
 		} else {
 			if(returns.bvalue[0] != 0xff) {
-				card* tc[16];
+				card* tc[256];
 				for(i = 0; i < count; ++i)
 					player[target_player].list_main.pop_back();
 				for(i = 0; i < count; ++i)
 					tc[returns.bvalue[i]] = core.select_cards[i];
 				for(i = 0; i < count; ++i) {
-					player[target_player].list_main.push_back(tc[count - i - 1]);
-					tc[count - i - 1]->current.sequence = (uint8_t)player[target_player].list_main.size() - 1;
+					player[target_player].list_main.push_back(tc[count - 1 - i]);
 				}
+				reset_sequence(target_player, LOCATION_DECK);
 				auto clit = player[target_player].list_main.rbegin();
 				for(i = 0; i < count; ++i, ++clit) {
 					card* pcard = *clit;
@@ -2609,8 +2609,14 @@ int32_t field::process_battle_command(uint16_t step) {
 			core.units.begin()->step = 6;
 			return FALSE;
 		}
-		// must attack monster
-		if(atype == 3 || is_player_affected_by_effect(infos.turn_player, EFFECT_PATRICIAN_OF_DARKNESS)) {
+		bool must_attack_monster = atype == 3;
+		bool oppo_select = is_player_affected_by_effect(infos.turn_player, EFFECT_PATRICIAN_OF_DARKNESS);
+		if(!oppo_select && must_attack_monster && core.select_cards.size() > 1) {
+			effect_set eset;
+			core.attacker->filter_effect(EFFECT_MUST_ATTACK_MONSTER, &eset);
+			oppo_select = eset.size() > 1;
+		}
+		if(oppo_select) {
 			if(core.select_cards.size() == 1)
 				returns.bvalue[1] = 0;
 			else {
@@ -2628,7 +2634,7 @@ int32_t field::process_battle_command(uint16_t step) {
 			pduel->write_buffer8(HINT_SELECTMSG);
 			pduel->write_buffer8(infos.turn_player);
 			pduel->write_buffer32(549);
-			add_process(PROCESSOR_SELECT_CARD, 0, 0, 0, infos.turn_player + (core.attack_cancelable ? 0x20000 : 0), 0x10001);
+			add_process(PROCESSOR_SELECT_CARD, 0, 0, 0, infos.turn_player + (core.attack_cancelable && !must_attack_monster ? 0x20000 : 0), 0x10001);
 		}
 		core.units.begin()->step = 5;
 		return FALSE;
@@ -3919,6 +3925,9 @@ int32_t field::process_turn(uint16_t step, uint8_t turn_player) {
 			}
 			return FALSE;
 		}
+		// ensure "entered 2nd Battle Phase" marker stored in `arg2` do not carry over into Main Phase 2.
+		core.units.begin()->arg2 = 0;
+		
 		core.skip_m2 = FALSE;
 		if(returns.ivalue[0] == 3) { // End Phase
 			core.skip_m2 = TRUE;
@@ -4148,6 +4157,7 @@ int32_t field::add_chain(uint16_t step) {
 		clit.triggering_effect = peffect;
 		clit.evt = ch.evt;
 		phandler->create_relation(clit);
+		peffect->set_active_type();
 		peffect->dec_count(playerid);
 		if(!(peffect->type & EFFECT_TYPE_ACTIVATE)) {
 			peffect->type |= EFFECT_TYPE_ACTIVATE;
