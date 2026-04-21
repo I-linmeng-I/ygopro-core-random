@@ -1453,15 +1453,11 @@ void field::filter_player_effect(uint8_t playerid, uint32_t code, effect_set* es
 		std::sort(eset->begin(), eset->end(), effect_sort_id);
 }
 int32_t field::filter_matching_card(lua_State* L, int32_t findex, uint8_t self, uint32_t location1, uint32_t location2, group* pgroup, card* pexception, group* pexgroup, uint32_t extraargs, card** pret, int32_t fcount, int32_t is_target) {
-    uint8_t oldself = self;
 	if(self != 0 && self != 1)
 		return FALSE;
 	card_set result;
 	uint32_t location = location1;
 	for(uint32_t p = 0; p < 2; ++p) {
-        if(core.duel_rule & DUEL_TAG_MODE && location & (LOCATION_DECK | LOCATION_HAND | LOCATION_EXTRA)) {
-            self = self + 1 - 2 * (self % 3);//改成队友
-        }
 		if(location & LOCATION_MZONE) {
 			for(auto& pcard : player[self].list_mzone) {
 				if(pcard && !pcard->is_treated_as_not_on_field()
@@ -1527,49 +1523,112 @@ int32_t field::filter_matching_card(lua_State* L, int32_t findex, uint8_t self, 
 			}
 		}
 		if(location & LOCATION_DECK) {
-			for(auto cit = player[self].list_main.rbegin(); cit != player[self].list_main.rend(); ++cit) {
-				if(*cit != pexception && !(pexgroup && pexgroup->has_card(*cit))
-				        && pduel->lua->check_filter(L, *cit, findex, extraargs)
-				        && (!is_target || (*cit)->is_capable_be_effect_target(core.reason_effect, core.reason_player))) {
-					if(pret) {
-						*pret = *cit;
-						return TRUE;
-					}
-					result.insert(*cit);
-					if(fcount && (int32_t)result.size() >= fcount)
-						return TRUE;
-				}
-			}
+            if (core.duel_options & DUEL_TAG_MODE)
+            {
+                for (auto cit = player[self].tag_list_main.rbegin(); cit != player[self].tag_list_main.rend(); ++cit){
+                    if (*cit != pexception && !(pexgroup && pexgroup->has_card(*cit)) 
+                            && pduel->lua->check_filter(L, *cit, findex, extraargs) 
+                            && (!is_target || (*cit)->is_capable_be_effect_target(core.reason_effect, core.reason_player))){
+                        if (pret){
+                            *pret = *cit;
+                            return TRUE;
+                        }
+                        result.insert(*cit);
+                        if (fcount && (int32_t)result.size() >= fcount)
+                            return TRUE;
+                    }
+                }
+            }
+            else{
+                for (auto cit = player[self].list_main.rbegin(); cit != player[self].list_main.rend(); ++cit){
+                    if (*cit != pexception && !(pexgroup && pexgroup->has_card(*cit)) 
+                            && pduel->lua->check_filter(L, *cit, findex, extraargs) 
+                            && (!is_target || (*cit)->is_capable_be_effect_target(core.reason_effect, core.reason_player))){
+                        if (pret){
+                            *pret = *cit;
+                            return TRUE;
+                        }
+                        result.insert(*cit);
+                        if (fcount && (int32_t)result.size() >= fcount)
+                            return TRUE;
+                    }
+                }
+            }
+            // for(auto cit = player[self].list_main.rbegin(); cit != player[self].list_main.rend(); ++cit) {
+			// 	if(*cit != pexception && !(pexgroup && pexgroup->has_card(*cit))
+			// 	        && pduel->lua->check_filter(L, *cit, findex, extraargs)
+			// 	        && (!is_target || (*cit)->is_capable_be_effect_target(core.reason_effect, core.reason_player))) {
+			// 		if(pret) {
+			// 			*pret = *cit;
+			// 			return TRUE;
+			// 		}
+			// 		result.insert(*cit);
+			// 		if(fcount && (int32_t)result.size() >= fcount)
+			// 			return TRUE;
+			// 	}
+			// }
 		}
 		if(location & LOCATION_EXTRA) {
-			for(auto cit = player[self].list_extra.rbegin(); cit != player[self].list_extra.rend(); ++cit) {
-				if(*cit != pexception && !(pexgroup && pexgroup->has_card(*cit))
-				        && pduel->lua->check_filter(L, *cit, findex, extraargs)
-				        && (!is_target || (*cit)->is_capable_be_effect_target(core.reason_effect, core.reason_player))) {
-					if(pret) {
-						*pret = *cit;
-						return TRUE;
-					}
-					result.insert(*cit);
-					if(fcount && (int32_t)result.size() >= fcount)
-						return TRUE;
-				}
-			}
+            if (core.duel_options & DUEL_TAG_MODE){
+                for(auto cit = player[self].tag_list_extra.rbegin(); cit != player[self].tag_list_extra.rend(); ++cit) {
+                    if(*cit != pexception && !(pexgroup && pexgroup->has_card(*cit))
+                            && pduel->lua->check_filter(L, *cit, findex, extraargs)
+                            && (!is_target || (*cit)->is_capable_be_effect_target(core.reason_effect, core.reason_player))) {
+                        if(pret) {
+                            *pret = *cit;
+                            return TRUE;
+                        }
+                        result.insert(*cit);
+                        if(fcount && (int32_t)result.size() >= fcount)
+                            return TRUE;
+                    }
+                }
+            }else{
+                for(auto cit = player[self].list_extra.rbegin(); cit != player[self].list_extra.rend(); ++cit) {
+                    if(*cit != pexception && !(pexgroup && pexgroup->has_card(*cit))
+                            && pduel->lua->check_filter(L, *cit, findex, extraargs)
+                            && (!is_target || (*cit)->is_capable_be_effect_target(core.reason_effect, core.reason_player))) {
+                        if(pret) {
+                            *pret = *cit;
+                            return TRUE;
+                        }
+                        result.insert(*cit);
+                        if(fcount && (int32_t)result.size() >= fcount)
+                            return TRUE;
+                    }
+                }
+            }
 		}
 		if(location & LOCATION_HAND) {
-			for(auto& pcard : player[self].list_hand) {
-				if(pcard != pexception && !(pexgroup && pexgroup->has_card(pcard))
-				        && pduel->lua->check_filter(L, pcard, findex, extraargs)
-				        && (!is_target || pcard->is_capable_be_effect_target(core.reason_effect, core.reason_player))) {
-					if(pret) {
-						*pret = pcard;
-						return TRUE;
-					}
-					result.insert(pcard);
-					if(fcount &&  (int32_t)result.size() >= fcount)
-						return TRUE;
-				}
-			}
+            if (core.duel_options & DUEL_TAG_MODE){
+                for(auto& pcard : player[self].tag_list_hand) {
+                    if(pcard != pexception && !(pexgroup && pexgroup->has_card(pcard))
+                            && pduel->lua->check_filter(L, pcard, findex, extraargs)
+                            && (!is_target || pcard->is_capable_be_effect_target(core.reason_effect, core.reason_player))) {
+                        if(pret) {
+                            *pret = pcard;
+                            return TRUE;
+                        }
+                        result.insert(pcard);
+                        if(fcount &&  (int32_t)result.size() >= fcount)
+                            return TRUE;
+                    }
+                }
+            }else{
+                for(auto& pcard : player[self].list_hand) {
+                    if(pcard != pexception && !(pexgroup && pexgroup->has_card(pcard))
+                            && pduel->lua->check_filter(L, pcard, findex, extraargs)
+                            && (!is_target || pcard->is_capable_be_effect_target(core.reason_effect, core.reason_player))) {
+                        if(pret) {
+                            *pret = pcard;
+                            return TRUE;
+                        }
+                        result.insert(pcard);
+                        if(fcount &&  (int32_t)result.size() >= fcount)
+                            return TRUE;
+                    }
+                }
+            }
 		}
 		if(location & LOCATION_GRAVE) {
 			for(auto cit = player[self].list_grave.rbegin(); cit != player[self].list_grave.rend(); ++cit) {
@@ -1602,7 +1661,7 @@ int32_t field::filter_matching_card(lua_State* L, int32_t findex, uint8_t self, 
 			}
 		}
 		location = location2;
-		self = 1 - oldself;
+		self = 1 - self;
 	}
 	if (pgroup)
 		pgroup->container.insert(result.begin(), result.end());
