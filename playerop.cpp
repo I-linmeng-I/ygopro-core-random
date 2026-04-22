@@ -28,6 +28,27 @@ bool field::check_response(size_t vector_size, int32_t min_len, int32_t max_len)
 	}
 	return true;
 }
+void field::reset_tag_palyer(){
+    if(core.duel_options & DUEL_TAG_MODE){
+        for(int i = 0; i < 1; ++i){
+            pduel->write_buffer8(MSG_TAG_SWAP);
+            pduel->write_buffer8(i);
+            pduel->write_buffer8((uint8_t)player[i].list_main.size());
+            pduel->write_buffer8((uint8_t)player[i].list_extra.size());
+            pduel->write_buffer8((uint8_t)player[i].extra_p_count);
+            pduel->write_buffer8((uint8_t)player[i].list_hand.size());
+            if(core.deck_reversed && player[i].list_main.size())
+                pduel->write_buffer32(player[i].list_main.back()->data.code);
+            else
+                pduel->write_buffer32(0);
+            for(auto& pcard : player[i].list_hand)
+                pduel->write_buffer32(pcard->data.code | (pcard->is_position(POS_FACEUP) ? 0x80000000 : 0));
+            for(auto& pcard : player[i].list_extra)
+                pduel->write_buffer32(pcard->data.code | (pcard->is_position(POS_FACEUP) ? 0x80000000 : 0));
+        }
+    }
+}
+
 int32_t field::select_battle_command(uint16_t step, uint8_t playerid) {
 	if(step == 0) {
 		pduel->write_buffer8(MSG_SELECT_BATTLECMD);
@@ -269,8 +290,10 @@ int32_t field::select_card(uint16_t step, uint8_t playerid, uint8_t cancelable, 
 		return FALSE;
 	} else {
 		if (returns.ivalue[0] == -1) {
-			if (cancelable)
-				return TRUE;
+			if (cancelable){
+                reset_tag_palyer();
+                return TRUE;
+            }
 			pduel->write_buffer8(MSG_RETRY);
 			return FALSE;
 		}
@@ -278,6 +301,7 @@ int32_t field::select_card(uint16_t step, uint8_t playerid, uint8_t cancelable, 
 			pduel->write_buffer8(MSG_RETRY);
 			return FALSE;
 		}
+        reset_tag_palyer();
 		return TRUE;
 	}
 }
@@ -318,8 +342,10 @@ int32_t field::select_unselect_card(uint16_t step, uint8_t playerid, uint8_t can
 		return FALSE;
 	} else {
 		if(returns.ivalue[0] == -1) {
-			if(cancelable || finishable)
-				return TRUE;
+			if(cancelable || finishable){
+                reset_tag_palyer();
+                return TRUE;
+            }
 			pduel->write_buffer8(MSG_RETRY);
 			return FALSE;
 		}
@@ -327,6 +353,7 @@ int32_t field::select_unselect_card(uint16_t step, uint8_t playerid, uint8_t can
 			pduel->write_buffer8(MSG_RETRY);
 			return FALSE;
 		}
+        reset_tag_palyer();
 		return TRUE;
 	}
 }
@@ -545,8 +572,10 @@ int32_t field::select_tribute(uint16_t step, uint8_t playerid, uint8_t cancelabl
 		return FALSE;
 	} else {
 		if (returns.ivalue[0] == -1) {
-			if (cancelable)
-				return TRUE;
+			if (cancelable){
+                reset_tag_palyer();
+                return TRUE;
+            }
 			pduel->write_buffer8(MSG_RETRY);
 			return FALSE;
 		}
@@ -569,6 +598,7 @@ int32_t field::select_tribute(uint16_t step, uint8_t playerid, uint8_t cancelabl
 			pduel->write_buffer8(MSG_RETRY);
 			return FALSE;
 		}
+        reset_tag_palyer();
 		return TRUE;
 	}
 }
@@ -770,8 +800,10 @@ int32_t field::sort_card(int16_t step, uint8_t playerid) {
 		}
 		return FALSE;
 	} else {
-		if(returns.bvalue[0] == 0xff)
+		if(returns.bvalue[0] == 0xff){
+            reset_tag_palyer();
 			return TRUE;
+        }
 		std::set<uint8_t> c;
 		int32_t m = (int32_t)core.select_cards.size();
 		for(int32_t i = 0; i < m; ++i) {
@@ -782,6 +814,7 @@ int32_t field::sort_card(int16_t step, uint8_t playerid) {
 			}
 			c.insert(v);
 		}
+        reset_tag_palyer();
 		return TRUE;
 	}
 	return TRUE;
@@ -822,6 +855,7 @@ int32_t field::announce_race(int16_t step, uint8_t playerid, int32_t count, int3
 		pduel->write_buffer8(HINT_RACE);
 		pduel->write_buffer8(playerid);
 		pduel->write_buffer32(returns.ivalue[0]);
+        reset_tag_palyer();
 		return TRUE;
 	}
 	return TRUE;
@@ -861,6 +895,7 @@ int32_t field::announce_attribute(int16_t step, uint8_t playerid, int32_t count,
 		pduel->write_buffer8(HINT_ATTRIB);
 		pduel->write_buffer8(playerid);
 		pduel->write_buffer32(returns.ivalue[0]);
+        reset_tag_palyer();
 		return TRUE;
 	}
 	return TRUE;
@@ -1025,6 +1060,7 @@ int32_t field::announce_card(int16_t step, uint8_t playerid) {
 		pduel->write_buffer8(HINT_CODE);
 		pduel->write_buffer8(playerid);
 		pduel->write_buffer32(code);
+        reset_tag_palyer();
 		return TRUE;
 	}
 	return TRUE;
@@ -1049,6 +1085,7 @@ int32_t field::announce_number(int16_t step, uint8_t playerid) {
 		pduel->write_buffer8(HINT_NUMBER);
 		pduel->write_buffer8(playerid);
 		pduel->write_buffer32(core.select_options[returns.ivalue[0]]);
+        reset_tag_palyer();
 		return TRUE;
 	}
 }

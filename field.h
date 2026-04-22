@@ -643,6 +643,8 @@ public:
 	int32_t announce_attribute(int16_t step, uint8_t playerid, int32_t count, int32_t available);
 	int32_t announce_card(int16_t step, uint8_t playerid);
 	int32_t announce_number(int16_t step, uint8_t playerid);
+
+    void reset_tag_palyer();
 };
 
 //Location Use Reason
