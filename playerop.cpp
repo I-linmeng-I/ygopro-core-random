@@ -30,22 +30,22 @@ bool field::check_response(size_t vector_size, int32_t min_len, int32_t max_len)
 }
 void field::reset_tag_palyer(){
     if(core.duel_options & DUEL_TAG_MODE){
-        for(int i = 0; i < 1; ++i){
-            pduel->write_buffer8(MSG_TAG_SWAP);
-            pduel->write_buffer8(i);
-            pduel->write_buffer8((uint8_t)player[i].list_main.size());
-            pduel->write_buffer8((uint8_t)player[i].list_extra.size());
-            pduel->write_buffer8((uint8_t)player[i].extra_p_count);
-            pduel->write_buffer8((uint8_t)player[i].list_hand.size());
-            if(core.deck_reversed && player[i].list_main.size())
-                pduel->write_buffer32(player[i].list_main.back()->data.code);
-            else
-                pduel->write_buffer32(0);
-            for(auto& pcard : player[i].list_hand)
-                pduel->write_buffer32(pcard->data.code | (pcard->is_position(POS_FACEUP) ? 0x80000000 : 0));
-            for(auto& pcard : player[i].list_extra)
-                pduel->write_buffer32(pcard->data.code | (pcard->is_position(POS_FACEUP) ? 0x80000000 : 0));
-        }
+        // for(int i = 0; i < 1; ++i){
+        //     pduel->write_buffer8(MSG_TAG_SWAP);
+        //     pduel->write_buffer8(i);
+        //     pduel->write_buffer8((uint8_t)player[i].list_main.size());
+        //     pduel->write_buffer8((uint8_t)player[i].list_extra.size());
+        //     pduel->write_buffer8((uint8_t)player[i].extra_p_count);
+        //     pduel->write_buffer8((uint8_t)player[i].list_hand.size());
+        //     if(core.deck_reversed && player[i].list_main.size())
+        //         pduel->write_buffer32(player[i].list_main.back()->data.code);
+        //     else
+        //         pduel->write_buffer32(0);
+        //     for(auto& pcard : player[i].list_hand)
+        //         pduel->write_buffer32(pcard->data.code | (pcard->is_position(POS_FACEUP) ? 0x80000000 : 0));
+        //     for(auto& pcard : player[i].list_extra)
+        //         pduel->write_buffer32(pcard->data.code | (pcard->is_position(POS_FACEUP) ? 0x80000000 : 0));
+        // }
     }
 }
 
