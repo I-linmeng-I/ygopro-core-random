@@ -2302,6 +2302,12 @@ int32_t field::process_idle_command(uint16_t step) {
 	case 6: {
 		card* target = core.spsummonable_cards[returns.ivalue[0] >> 16];
 		core.summon_cancelable = TRUE;
+        if(target->current.location & LOCATION_EXTRA && core.duel_options & DUEL_TAG_MODE) {
+            pduel->write_buffer8(MSG_HINT);
+            pduel->write_buffer8(HINT_CARD);
+            pduel->write_buffer8(infos.turn_player);
+            pduel->write_buffer32(target->data.code);
+        }
 		special_summon_rule(infos.turn_player, target, 0);
 		core.units.begin()->step = -1;
 		return FALSE;
@@ -2623,17 +2629,53 @@ int32_t field::process_battle_command(uint16_t step) {
 				pduel->write_buffer8(MSG_BECOME_TARGET);
 				pduel->write_buffer8(1);
 				pduel->write_buffer32(core.attacker->get_info_location());
-				pduel->write_buffer8(MSG_HINT);
-				pduel->write_buffer8(HINT_SELECTMSG);
-				pduel->write_buffer8(1 - infos.turn_player);
-				pduel->write_buffer32(549);
+                if(core.duel_options& DUEL_TAG_MODE){
+                    pduel->write_buffer8(MSG_HINT);
+                    pduel->write_buffer8(HINT_SELECTMSG);
+                    pduel->write_buffer8(1 - infos.turn_player);
+                    pduel->write_buffer32(549);
+
+                    pduel->write_buffer8(MSG_HINT);
+                    pduel->write_buffer8(HINT_CARD);
+                    pduel->write_buffer8(1 - infos.turn_player);
+                    pduel->write_buffer32(core.attacker->data.code);
+
+                    pduel->write_buffer8(MSG_HINT);
+                    pduel->write_buffer8(HINT_ZONE);
+                    pduel->write_buffer8(1 - infos.turn_player);
+                    pduel->write_buffer32(1 << core.attacker->current.sequence);
+                    //这里把core.attacker的位置变成desc
+                } else {
+                    pduel->write_buffer8(MSG_HINT);
+                    pduel->write_buffer8(HINT_SELECTMSG);
+                    pduel->write_buffer8(1 - infos.turn_player);
+                    pduel->write_buffer32(549);
+                }
 				add_process(PROCESSOR_SELECT_CARD, 0, 0, 0, 1 - infos.turn_player, 0x10001);
 			}
 		} else {
-			pduel->write_buffer8(MSG_HINT);
-			pduel->write_buffer8(HINT_SELECTMSG);
-			pduel->write_buffer8(infos.turn_player);
-			pduel->write_buffer32(549);
+            if(core.duel_options& DUEL_TAG_MODE){
+                pduel->write_buffer8(MSG_HINT);
+                pduel->write_buffer8(HINT_SELECTMSG);
+                pduel->write_buffer8(infos.turn_player);
+                pduel->write_buffer32(549);
+
+                pduel->write_buffer8(MSG_HINT);
+                pduel->write_buffer8(HINT_CARD);
+                pduel->write_buffer8(infos.turn_player);
+                pduel->write_buffer32(core.attacker->data.code);
+
+                pduel->write_buffer8(MSG_HINT);
+                pduel->write_buffer8(HINT_ZONE);
+                pduel->write_buffer8(infos.turn_player);
+                pduel->write_buffer32(1 << core.attacker->current.sequence);
+                //这里把core.attacker的位置变成desc
+            } else {
+                pduel->write_buffer8(MSG_HINT);
+                pduel->write_buffer8(HINT_SELECTMSG);
+                pduel->write_buffer8(infos.turn_player);
+                pduel->write_buffer32(549);
+            }
 			add_process(PROCESSOR_SELECT_CARD, 0, 0, 0, infos.turn_player + (core.attack_cancelable && !must_attack_monster ? 0x20000 : 0), 0x10001);
 		}
 		core.units.begin()->step = 5;
@@ -2646,10 +2688,28 @@ int32_t field::process_battle_command(uint16_t step) {
 		} else {
 			if(core.select_cards.size()) {
 				auto opposel = is_player_affected_by_effect(infos.turn_player, EFFECT_PATRICIAN_OF_DARKNESS);
-				pduel->write_buffer8(MSG_HINT);
-				pduel->write_buffer8(HINT_SELECTMSG);
-				pduel->write_buffer8(opposel ? 1 - infos.turn_player : infos.turn_player);
-				pduel->write_buffer32(549);
+                if(core.duel_options& DUEL_TAG_MODE){
+                    pduel->write_buffer8(MSG_HINT);
+                    pduel->write_buffer8(HINT_SELECTMSG);
+                    pduel->write_buffer8(opposel ? 1 - infos.turn_player : infos.turn_player);
+                    pduel->write_buffer32(549);
+
+                    pduel->write_buffer8(MSG_HINT);
+                    pduel->write_buffer8(HINT_CARD);
+                    pduel->write_buffer8(opposel ? 1 - infos.turn_player : infos.turn_player);
+                    pduel->write_buffer32(core.attacker->data.code);
+
+                    pduel->write_buffer8(MSG_HINT);
+                    pduel->write_buffer8(HINT_ZONE);
+                    pduel->write_buffer8(opposel ? 1 - infos.turn_player : infos.turn_player);
+                    pduel->write_buffer32(1 << core.attacker->current.sequence);
+                    //这里把core.attacker的位置变成desc
+                } else {
+                    pduel->write_buffer8(MSG_HINT);
+                    pduel->write_buffer8(HINT_SELECTMSG);
+                    pduel->write_buffer8(opposel ? 1 - infos.turn_player : infos.turn_player);
+                    pduel->write_buffer32(549);
+                }
 				add_process(PROCESSOR_SELECT_CARD, 0, 0, 0, opposel ? 1 - infos.turn_player : infos.turn_player + (core.attack_cancelable ? 0x20000 : 0), 0x10001);
 			} else {
 				core.units.begin()->arg3 = TRUE;
